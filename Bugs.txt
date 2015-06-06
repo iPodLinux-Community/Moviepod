@@ -1,0 +1,13 @@
+Note:
+These are by far not all the bugs, just those that I can currently remember.
+Also check the Todo list, as there are quite a few important things in there as well.
+
+
+- 8 Bit audio won't work
+
+- In some resolutions black areas become striped black/white
+
+- Discolouration at hard lines (possibly an overflow problem)
+
+- At the moment the audio has approximately 300ms of skew (~3 Frames)
+  not more, not less.

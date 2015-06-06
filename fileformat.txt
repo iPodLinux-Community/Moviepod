@@ -1,0 +1,98 @@
+This file describes the mvpd file format.
+
+Adress	Size		Value		Use
+
+0	4 char		Identifier	The first for Byte in every mvpd file should be the
+					identifying string "MVPD"
+				
+4	uint8		File Version	The version of the file. Current versions can be 0 or 1
+					This number should be incremented whenever mayor changes
+					are made to the file layout.
+				
+5	uint16		Start Offset	The Offset of the first data Block from the beginning of the
+					file.
+						
+7	uint16		Matrix_X	The width of the encoded picture. This doesn't has to equal
+					the screen width. But the value has to be a multiple of 16
+				
+9	uint16		Matrix_Y	The height of the encoded picture. This doesn't has to equal
+					the screen height. But the value has to be a multiple of 16
+				
+11	uint16		frame_length	The Maximum frame length throughout the movie
+
+13	uint8		Quality		The initialization value for the quantization table.
+
+14	char		Color		Indicates wether the movie is in color (c) or
+					grayscale (b).
+					
+15	uint32		frames		The total number of frames the movie contains.
+
+19	uint8		ms_per_frame	The number of milisecs each frame should be displayed.
+					This value isn't used in the current player, but it should be
+					consistent with fragment_size (see below)
+					
+//only File Version 1 or higher
+
+20	uint8		audio		Indicates wether the movie contains audio information.
+					The value should be 0 (no audio) or 1 (audio)
+					
+21	uint16		fragment_size	The amount of audio samples per frame
+
+23	uint8		bitrate		Indicates wether the file is 8 Bit or 16 Bit.
+					This field isn't used in the current version, since
+					all audio data is downsampled to 8 bit and then again
+					upsampled.
+					
+24	uint8		stereo		Indicates wether the audio data is mono (0) or stereo (1)
+
+25	uint16		sample_rate	The sample rate of the audio data. In the current version
+					this has to be 44100
+					
+// Only on File Version 4 or higher
+List of frame positions as 32 Bit ints
+
+// 0xC0DEC0DE
+
+// Only on File Version 3 or higher
+First audio data Block
+(There is always one audio Block bufferd)
+
+//Data Block:
+The movie data can consist of audio frames and video frames.
+The audio and video frames are interleaved, where each audio frame is followed by the video frame,
+that should be displayed during that audio.
+This means that usually the Data Block starts with an audio frame and ends with an video frame.
+If the movie has no audio data, all video frames follow directly after each other.
+
+//Audio Frame:
+At the moment the only possible audio data is a sequence of signed 8 Bit values.
+The values are signed as oppossed to the usual unsigned 8 bit wav format, because
+the ipod hardware only accepts 16 bit audio samples. Therefore these values only have
+to be shifted left by 8 bits and passed on to the soundcard.
+Each audio frame ends with MVPD_END_OF_AUDIO_FRAME.
+
+//Video Frame:
+Each video frame begins with an unsigned 16 Bit integer, which indicates the length of that
+frame.
+
+A video frame can consist of either three colour lists if the movie is coloured or one colour list,
+if the movie is grayscale.
+The video frame is terminanted by MVPD_END_OF_VIDEO_FRAME.
+Each colour list is indivdually terminated by MVPD_END_OF_COLOUR.
+
+Each color list consists of a series of smaller lists, which denote the none zero
+values of one dct block.
+Each of these lists ends with MVPD_END_OF_PICTURE_BLOCK
+
+
+The first colour list is the Y (luminance list). The first dct list is the upper left corner
+of the picture. After the Y list follows the U list and after that the V list.
+
+Each dct list contains the information for one 8x8 block in the final picture.
+The U and V lists are downsampled to half the height and half the width.
+Therfore each video frame should contain:
+((Matrix_X / 8) * (Matrix_Y / 8)) + (((Matrix_X / 8)/2) * ((Matrix_Y / 8)/2)) + (((Matrix_X / 8)/2) * ((Matrix_Y / 8)/2))
+|^             Y list          ^|   |^                 U list              ^|   |^                 V list              ^|
+
+= (((Matrix_X * Matrix_Y) / 64) * 1,5)
+dct lists.

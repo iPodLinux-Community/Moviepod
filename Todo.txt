@@ -1,0 +1,24 @@
+These are the most pressing issues in no particular order:
+
+- Big Endian / Little Endian support for the encoder.
+
+- Extensive testing
+
+- Extensive testing on something other than an iPod nano
+
+- 22kHz audio support
+
+- Encoder for uncompressed avi
+
+- Clipping / scaling of oversized videos
+
+- Increase performance by implementing the idct in ARM Assembler
+
+- User input support (play, pause, exit, forward, volume)
+
+- High quality mode with 16 Bit audio and maybe 16 Bit video
+
+- Compression for the audio data
+
+- Menu
+
